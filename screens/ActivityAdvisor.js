@@ -112,13 +112,16 @@ export default function ActivityAdvisor() {
 
   function getActivity() {
     let date = new Date();
-    let time = date.getHours() + ":" + date.getMinutes();
+    let time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + + date.getMinutes();
     console.log(time);
     let URL = "http://172.22.80.1:8080/activity-advisor";
     // const json = JSON.stringify({ location: { latitude: (location == null) ? null : location.coords.latitude, longitude: (location == null) ? null : location.coords.longitude }, steps: pastStepCount, batteryPercentage: Math.round(batteryPercentage*100),  time: time, temperature: 24 });
     const json = JSON.stringify({
       location: { latitude: 46.063568, longitude: 14.54745 },
       temperature: 24,
+      batteryPercentage: Math.round(batteryPercentage*100),
+      time: time,
+
     });
     axios.defaults.headers.common["X-Context"] = json;
     axios
