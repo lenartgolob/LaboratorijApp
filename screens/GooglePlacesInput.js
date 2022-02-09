@@ -29,6 +29,7 @@ const GooglePlacesInput = () => {
           strictbounds: true,
       }}
       nearbyPlacesAPI="GooglePlacesSearch" // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
+      renderLeftButton={()  => <Image source={require('../assets/search.png')} style={styles.search} />}
       styles={styles}
     />
   );
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
     },
     textInput: {
       backgroundColor: 'transparent',
-      fontSize: 15,
+      fontSize: 18,
       lineHeight: 22.5,
       paddingBottom: 0,
       flex: 1,
@@ -84,6 +85,12 @@ const styles = StyleSheet.create({
     },
     predefinedPlacesDescription: {
       color: 'black'
+    },
+    search: {
+      marginTop: 10,
+      width: 30,
+      height: 30,
+      marginLeft: 5,
     }
 });
 

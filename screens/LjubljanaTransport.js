@@ -30,6 +30,7 @@ export default function LjubljanaTransport() {
   const panelReference = React.createRef();
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
+  const [logoVisible, setLogoVisible] = useState(true);
 
   function placeFound(placeID){
     if(origin == null && destination == null) {
@@ -38,7 +39,23 @@ export default function LjubljanaTransport() {
     else if(origin != null && destination == null) {
       setDestination(placeID);
     }
-    alert("heej");
+    else if(origin != null && destination != null) {
+      // Gre na novo stran
+    }
+  }
+
+  function getMeSomewhere() {
+    panelReference.current?.show(windowHeight*0.7);
+    setOrigin(null);
+    setDestination(null);
+  }
+
+  function getMeHome(){
+    alert("In development")
+  }
+
+  function getMeToWork(){
+    alert("In development")
   }
 
     return(
@@ -49,9 +66,29 @@ export default function LjubljanaTransport() {
           initialRegion={region}
           mapPadding={{bottom: 50}}
         />
-        <TouchableOpacity activeOpacity={1} style={styles.searchContainer} onPress={()=> {panelReference.current?.show(windowHeight*0.7)}} />
-
-        <SlidingUpPanel ref={panelReference} backdropOpacity={0}>
+        <View style={styles.multiSearchContainer}>
+          <TouchableOpacity activeOpacity={1} style={styles.searchContainer} onPress={()=> getMeSomewhere()}>
+            <Image source={require('../assets/AB.png')} style={styles.search} />
+          </TouchableOpacity>
+          <View style={{flexDirection:"row"}}>
+            <TouchableOpacity activeOpacity={1} style={styles.homeContainer} onPress={()=> getMeHome()}>
+              <Image source={require('../assets/home.png')} style={styles.search} />
+              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#808080'}}>Get me home</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={1} style={styles.workContainer} onPress={()=> getMeToWork()}>
+              <Image source={require('../assets/work.png')} style={styles.search} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <View style={logoVisible ? styles.ljContainer : {display: 'none'}}>
+          <Image
+            source={require("../assets/ljubljana.png")}
+            style={styles.lj}
+          />
+        </View>
+        <SlidingUpPanel ref={panelReference} backdropOpacity={0} onDragStart={()=> {setLogoVisible(false)}} onBottomReached={()=> {setLogoVisible(true)}}>
           <View style={styles.slidingUpPanel}>
             <GooglePlacesInput style={styles.googleSearch} />
             <View style={styles.bgPanel} />
@@ -70,12 +107,11 @@ const styles = StyleSheet.create({
     height: "50%",
     width: "100%",
   },
-  searchContainer: {
-    backgroundColor: 'white',
-    height: 60,
-    marginTop: -30,
+  multiSearchContainer: {
+    height: 100,
     marginRight: 20,
     marginLeft: 20,
+    marginTop: -50,
     borderRadius: 10,
     // Shadow
     shadowColor: '#000',
@@ -83,6 +119,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 2,  
     elevation: 5,
+  },
+  searchContainer: {
+    backgroundColor: 'white',
+    height: 50,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderBottomColor: '#D3D3D3',
+    borderBottomWidth: 1,
+  },
+  homeContainer: {
+    backgroundColor: 'white',
+    height: 50,
+    borderBottomLeftRadius: 10,
+    flex: 1,
+    flexDirection: 'row',
+  },
+  workContainer: {
+    backgroundColor: 'white',
+    height: 50,
+    borderBottomRightRadius: 10,
+    flex: 1, 
+    borderLeftColor: '#D3D3D3',
+    borderLeftWidth: 1,
   },
   slidingUpPanel: {
     height: windowHeight*0.7,
@@ -96,4 +155,20 @@ const styles = StyleSheet.create({
   googleSearch: {
     marginTop: 0
   },
+  ljContainer: {
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    flex: 1,
+    marginBottom: 20,
+  },
+  lj: {
+    width: 50,
+    height: 61,
+  },
+  search: {
+    marginTop: 10,
+    width: 30,
+    height: 30,
+    marginLeft: 5,
+  }
 });
