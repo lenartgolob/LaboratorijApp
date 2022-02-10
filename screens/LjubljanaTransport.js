@@ -157,7 +157,6 @@ export default function LjubljanaTransport({ navigation }) {
         </View>
       </BoxShadow>     
         }
-        <GooglePlacesInput style={styles.googleSearch} />
         <View style={logoVisible ? styles.ljContainer : {display: 'none'}}>
           <Image
             source={require("../assets/ljubljana.png")}
