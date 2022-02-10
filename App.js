@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LandingPage from './screens/LandingPage';
 import ActivityAdvisor from './screens/ActivityAdvisor';
 import LjubljanaTransport from './screens/LjubljanaTransport';
+import DisplayTransport from './screens/DisplayTransport';
 import { NavigationContainer } from '@react-navigation/native';
 
 
@@ -14,6 +15,7 @@ export default function App() {
         <Stack.Screen options={{headerShown: false}} name="LandingPage" component={LandingPage} />
         <Stack.Screen name="ActivityAdvisor" component={ActivityAdvisor} />
         <Stack.Screen options={{headerShown: false}} name="LjubljanaTransport" component={LjubljanaTransport} />
+        <Stack.Screen options={{headerShown: false}} name="DisplayTransport" component={DisplayTransport} />
       </Stack.Navigator>
     </NavigationContainer>
   );

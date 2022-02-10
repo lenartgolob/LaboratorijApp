@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import {
   View,
   Text,
@@ -7,19 +6,37 @@ import {
   StyleSheet,
   ScrollView,
   ImageBackground,
+  LinearGradient,
   Dimensions,
   TouchableOpacity,
   Button,
   Image,
+  Platform,
+  TouchableHighlight,
 } from "react-native";
-import GooglePlacesInput from './GooglePlacesInput';
+// import GooglePlacesInput from './GooglePlacesInput';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import MapView from "react-native-maps";
 import { PROVIDER_GOOGLE } from "react-native-maps";
 import SlidingUpPanel from 'rn-sliding-up-panel';
+import {BoxShadow} from 'react-native-shadow';
 
 const windowHeight = Dimensions.get("window").height;
+const windowWidth = Dimensions.get("window").width;
 
-export default function LjubljanaTransport() {
+export default function LjubljanaTransport({ navigation }) {
+
+  const shadowOpt = {
+    width: windowWidth-40,
+    height:100,
+    color:"#000",
+    border:2,
+    radius:10,
+    opacity:0.3,
+    x:1,
+    y:1,
+    style: {marginVertical:5, marginLeft: 20, marginRight: 20, marginTop: -50}
+}
 
   const [region, setRegion] = useState({
     latitude: 46.053730,
@@ -32,19 +49,42 @@ export default function LjubljanaTransport() {
   const [destination, setDestination] = useState(null);
   const [logoVisible, setLogoVisible] = useState(true);
 
+  const GooglePlacesInput = () => {
+    return (
+      <GooglePlacesAutocomplete
+        onPress={(data, details = null) => {
+          placeFound(data.place_id);
+          console.log(data.place_id);
+        }}
+        query={{
+            key: 'AIzaSyAuyfKKLPGy-FzTFXMFrzIqq-0mYhECQKk',
+            language: 'en',
+            location: '46.053730, 14.521310',
+            radius: '8000', 
+            components: 'country:SI',
+            strictbounds: true,
+        }}
+        nearbyPlacesAPI="GooglePlacesSearch" // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
+        renderLeftButton={()  => <Image source={ (origin == null) ? require('../assets/start.png') : require('../assets/end.png')} style={stylesGoogleInput.search} />}
+        styles={stylesGoogleInput}
+      />
+    );
+  };
+
   function placeFound(placeID){
     if(origin == null && destination == null) {
       setOrigin(placeID);
     }
     else if(origin != null && destination == null) {
       setDestination(placeID);
-    }
-    else if(origin != null && destination != null) {
-      // Gre na novo stran
+      navigation.navigate("DisplayTransport", {
+        originPlaceID: origin,
+        destinationPlaceID: placeID,
+      });
     }
   }
 
-  function getMeSomewhere() {
+  function getMeAToB() {
     panelReference.current?.show(windowHeight*0.7);
     setOrigin(null);
     setDestination(null);
@@ -66,22 +106,58 @@ export default function LjubljanaTransport() {
           initialRegion={region}
           mapPadding={{bottom: 50}}
         />
-        <View style={styles.multiSearchContainer}>
-          <TouchableOpacity activeOpacity={1} style={styles.searchContainer} onPress={()=> getMeSomewhere()}>
-            <Image source={require('../assets/AB.png')} style={styles.search} />
+        { Platform.OS === 'ios' ?
+          <View style={styles.multiSearchContainerIOS}>
+            <TouchableOpacity activeOpacity={1} style={styles.searchContainer} onPress={()=> getMeAToB()}>
+              <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
+              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                  <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me from A to B</Text>
+              </View>
+              <View style={{width: 34}} />
+            </TouchableOpacity>
+            <View style={{flexDirection:"row"}}>
+              <TouchableOpacity activeOpacity={1} style={styles.homeContainer} onPress={()=> getMeHome()}>
+                <Image source={require('../assets/home2.png')} style={styles.homeImg} />
+                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                  <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me home</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={1} style={styles.workContainer} onPress={()=> getMeToWork()}>
+                <Image source={require('../assets/work2.png')} style={styles.workImg} />
+                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                  <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me to work</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        :   
+        <BoxShadow setting={shadowOpt}>
+        <View style={styles.multiSearchContainerAndroid}>
+          <TouchableOpacity activeOpacity={1} style={styles.searchContainer} onPress={()=> getMeAToB()}>
+            <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me from A to B</Text>
+            </View>
+            <View style={{width: 34}} />
           </TouchableOpacity>
           <View style={{flexDirection:"row"}}>
             <TouchableOpacity activeOpacity={1} style={styles.homeContainer} onPress={()=> getMeHome()}>
-              <Image source={require('../assets/home.png')} style={styles.search} />
+              <Image source={require('../assets/home2.png')} style={styles.homeImg} />
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#808080'}}>Get me home</Text>
+                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me home</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={1} style={styles.workContainer} onPress={()=> getMeToWork()}>
-              <Image source={require('../assets/work.png')} style={styles.search} />
+              <Image source={require('../assets/work2.png')} style={styles.workImg} />
+              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me to work</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
+      </BoxShadow>     
+        }
+        <GooglePlacesInput style={styles.googleSearch} />
         <View style={logoVisible ? styles.ljContainer : {display: 'none'}}>
           <Image
             source={require("../assets/ljubljana.png")}
@@ -107,18 +183,26 @@ const styles = StyleSheet.create({
     height: "50%",
     width: "100%",
   },
-  multiSearchContainer: {
+  multiSearchContainerAndroid: {
     height: 100,
-    marginRight: 20,
-    marginLeft: 20,
-    marginTop: -50,
     borderRadius: 10,
     // Shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.5,
     shadowRadius: 2,  
-    elevation: 5,
+  },
+  multiSearchContainerIOS: {
+    height: 100,
+    borderRadius: 10,
+    marginRight: 20,
+    marginLeft: 20,
+    marginTop: -50,
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.5,
+    shadowRadius: 2,  
   },
   searchContainer: {
     backgroundColor: 'white',
@@ -127,6 +211,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 10,
     borderBottomColor: '#D3D3D3',
     borderBottomWidth: 1,
+    flexDirection: 'row',
   },
   homeContainer: {
     backgroundColor: 'white',
@@ -142,6 +227,7 @@ const styles = StyleSheet.create({
     flex: 1, 
     borderLeftColor: '#D3D3D3',
     borderLeftWidth: 1,
+    flexDirection: 'row',
   },
   slidingUpPanel: {
     height: windowHeight*0.7,
@@ -165,9 +251,80 @@ const styles = StyleSheet.create({
     width: 50,
     height: 61,
   },
-  search: {
+  searchImg: {
+    marginTop: 10,
+    width: 34,
+    height: 34,
+    marginLeft: 5,
+  },
+  homeImg: {
     marginTop: 10,
     width: 30,
+    height: 30,
+    marginLeft: 5,
+  },
+  workImg: {
+    marginTop: 10,
+    width: 27,
+    height: 27,
+    marginLeft: 5,
+  }
+});
+
+const stylesGoogleInput = StyleSheet.create({
+  container: {
+    zIndex: 10,
+    overflow: 'visible',
+    height: 50,
+    flexGrow: 0,
+    flexShrink: 0
+  },
+  textInputContainer: {
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+    height: 50,
+    overflow: 'visible',
+    backgroundColor: 'white',
+    borderColor: 'white',
+    borderRadius: 10,
+    marginRight: 20,
+    marginLeft: 20,
+    // Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.5,
+    shadowRadius: 2,  
+    elevation: 5,
+  },
+  textInput: {
+    backgroundColor: 'transparent',
+    fontSize: 18,
+    lineHeight: 22.5,
+    paddingBottom: 0,
+    flex: 1,
+  },
+  listView: {
+    position: 'absolute',
+    top: 60,
+    left: 10,
+    right: 10,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    flex: 1,
+    elevation: 3,
+    zIndex: 10,
+    marginRight: 12,
+    marginLeft: 12,
+  },
+  description: {
+    color: 'black'
+  },
+  predefinedPlacesDescription: {
+    color: 'black'
+  },
+  search: {
+    marginTop: 12,
+    width: 75,
     height: 30,
     marginLeft: 5,
   }

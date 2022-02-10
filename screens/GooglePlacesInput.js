@@ -17,7 +17,7 @@ const GooglePlacesInput = () => {
   return (
     <GooglePlacesAutocomplete
       onPress={(data, details = null) => {
-        // LjubljanaTransport.placeFound(data.place_id);
+        LjubljanaTransport.placeFound(data.place_id);
         console.log(data.place_id);
       }}
       query={{
