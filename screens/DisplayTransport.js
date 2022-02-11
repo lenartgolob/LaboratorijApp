@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     View,
     Text,
@@ -15,14 +15,16 @@ import {
     TouchableHighlight,
   } from "react-native";
 import axios from "axios";
-import MapView from "react-native-maps";
-import { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Polyline } from "react-native-maps";
+import { PROVIDER_GOOGLE, Marker } from "react-native-maps";
 import {BoxShadow} from 'react-native-shadow';
 
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
 
 export default function DisplayTransport({route}) {
+
+    const googleMapsKey = require('../config.json').googleMapsKey;
 
     const shadowOpt = { 
         width: windowWidth-40,
@@ -45,6 +47,16 @@ export default function DisplayTransport({route}) {
     const panelReference = React.createRef();
     const [originPlaceID, setOriginPlaceID] = useState(route.params.originPlaceID)
     const [destinationPlaceID, setDestinationPlaceID] = useState(route.params.destinationPlaceID)
+    const [originCoordinates, setOriginCoordinates] = useState({
+      lat: 46.033703,
+      lng: 14.4525267,
+    })
+    const [destinationCoordinates, setDestinationCoordinates] = useState({
+      lat: 46.033703,
+      lng: 14.4525267,
+    })
+
+    const markers = [originCoordinates, destinationCoordinates];
 
     useEffect(() => {
         // const json = JSON.stringify({
@@ -60,7 +72,52 @@ export default function DisplayTransport({route}) {
         //     .catch(function (error) {
         //       console.log(error);
         //     });
+
+        // Get coordinates of origin and destination
+        console.log("yessir")
+        getCoordinatesFromPlaceID(originPlaceID, true);
+        getCoordinatesFromPlaceID(destinationPlaceID, false);
+
       }, []);
+
+      const mapRef = useRef();
+
+      useEffect(() => {
+        if (mapRef.current) {
+          // list of _id's must same that has been provided to the identifier props of the Marker
+          mapRef.current.fitToSuppliedMarkers(['origin','destination'], { 
+            edgePadding: 
+            { 
+              top: 50,
+              right: 50,
+              bottom: 50,
+              left: 50 
+            }
+          });
+        }
+      }, [originCoordinates, destinationCoordinates]);
+
+    function getCoordinatesFromPlaceID(placeID, isOrigin) {
+      axios
+      .get('https://maps.googleapis.com/maps/api/geocode/json?place_id=' + placeID + '&key=' + googleMapsKey)
+      .then(function (response) {
+        console.log(response.data.results[0].geometry.location);
+        if(isOrigin){
+          setOriginCoordinates({
+            lat: response.data.results[0].geometry.location.lat,
+            lng: response.data.results[0].geometry.location.lng,
+          });
+        } else {
+          setDestinationCoordinates({
+            lat: response.data.results[0].geometry.location.lat,
+            lng: response.data.results[0].geometry.location.lng,
+          });
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }
 
     return(
         <View style={styles.container}>
@@ -69,21 +126,54 @@ export default function DisplayTransport({route}) {
           provider={PROVIDER_GOOGLE}
           initialRegion={region}
           mapPadding={{bottom: 50}}
-        />       
+          ref={mapRef}
+        >
+          <Marker 
+            key={'origin'}
+            identifier={'origin'}
+            coordinate={{
+            latitude: originCoordinates.lat,
+            longitude: originCoordinates.lng,
+            }}
+          >
+            <Image source={require('../assets/startMarker.png')} style={{height: 40, width: 40}} />
+          </Marker>
+          <Marker
+            key={'destination'}
+            identifier={'destination'}
+            coordinate={{
+            latitude: destinationCoordinates.lat,
+            longitude: destinationCoordinates.lng,
+            }}
+          >
+            <Image source={require('../assets/endMarker.png')} style={{height: 40, width: 40}} />
+          </Marker>  
+          <Polyline
+            coordinates={[
+              { latitude: originCoordinates.lat, longitude: originCoordinates.lng },
+              { latitude: destinationCoordinates.lat, longitude: destinationCoordinates.lng },
+            ]}
+            strokeColor="#77ca9d"
+            strokeWidth={3}
+          />
+        </MapView>       
         <View style={styles.ABContainer}>
           <TouchableOpacity activeOpacity={1} style={styles.startContainer}>
             <View style={{width: 90}}>
-            <Image source={require('../assets/startText3.png')} style={styles.ABImg} />
+              <Image source={require('../assets/startText3.png')} style={styles.ABImg} />
             </View>
-            <Text style={{fontSize: 14, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>Tržaška cesta 121</Text>
-            <View style={{width: 34}} />
+            <View style={{flex: 1, marginRight: 3}}>
+              <Text style={{fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>{route.params.originAddress}</Text>
+            </View>
           </TouchableOpacity>
           <View style={{flexDirection:"row"}}>
             <TouchableOpacity activeOpacity={1} style={styles.destinationContainer} >
-                <View style={{width: 90}}>
+              <View style={{width: 90}}>
                 <Image source={require('../assets/endText3.png')} style={styles.ABImg} />
-                </View>
-              <Text style={{fontSize: 14, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>Dunajska cesta</Text>
+              </View>
+              <View style={{flex: 1, marginRight: 3}}>
+                <Text style={{fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>{route.params.destinationAddress}</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -126,12 +216,27 @@ export default function DisplayTransport({route}) {
                         <Text style={styles.smallText}>Taxis</Text>
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
-                        <Text style={styles.price}>577 kcal</Text>
+                        <Text style={styles.price}>6.2 €</Text>
                         <Text style={{marginRight: 5}}><Text style={styles.time}>52</Text> <Text style={styles.timeUnit}>min</Text></Text>
                     </View>
                 </View>
                 <View style={styles.fourthSuggestion}>
-                    <View style={styles.suggestionsIconContainer}>
+                  <View style={styles.suggestionsIconContainer}>
+                        <Image
+                            source={require("../assets/car.png")}
+                            style={styles.carImg}
+                        />
+                        <Text style={styles.smallText}>Carshare</Text>
+                    </View>
+                    <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
+                        <Text style={styles.price}>3 €</Text>
+                        <Text style={{marginRight: 5}}><Text style={styles.time}>52</Text> <Text style={styles.timeUnit}>min</Text></Text>
+                    </View>
+                </View>
+            </View>
+            <View style={{flexDirection:"row"}}>
+                <View style={styles.fifthSuggestion}>
+                  <View style={styles.suggestionsIconContainer}>
                         <Image
                             source={require("../assets/bus.png")}
                             style={styles.busImg}
@@ -139,14 +244,12 @@ export default function DisplayTransport({route}) {
                         <Text style={styles.smallText}>Buses</Text>
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
-                        <Text style={styles.price}>577 kcal</Text>
+                        <Text style={styles.price}>1.3 €</Text>
                         <Text style={{marginRight: 5}}><Text style={styles.time}>52</Text> <Text style={styles.timeUnit}>min</Text></Text>
                     </View>
                 </View>
-            </View>
-            <View style={{flexDirection:"row"}}>
-                <View style={styles.fifthSuggestion}>
-                    <View style={styles.suggestionsIconContainer}>
+                <View style={styles.sixthSuggestion}>
+                  <View style={styles.suggestionsIconContainer}>
                         <Image
                             source={require("../assets/train.png")}
                             style={styles.trainImg}
@@ -154,12 +257,9 @@ export default function DisplayTransport({route}) {
                         <Text style={styles.smallText}>Trains</Text>
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
-                        <Text style={styles.price}>577 kcal</Text>
+                        <Text style={styles.price}>1.8 €</Text>
                         <Text style={{marginRight: 5}}><Text style={styles.time}>52</Text> <Text style={styles.timeUnit}>min</Text></Text>
                     </View>
-                </View>
-                <View style={styles.sixthSuggestion}>
-
                 </View>
             </View>
         </View>
@@ -319,6 +419,11 @@ const styles = StyleSheet.create({
         height: 20,
         marginTop: 7,
       },
+      carImg: {
+        width: 34,
+        height: 12,
+        marginTop: 12,
+      },
       busImg: {
         width: 19,
         height: 20,
@@ -336,9 +441,9 @@ const styles = StyleSheet.create({
         marginRight: 5,
       },
       price: {
-        fontFamily: 'AvenirNext-DemiBold',
+        fontFamily: 'AvenirNext-Bold',
         fontSize: 12,
-        color: '#989898',
+        color: '#787878',
         marginRight: 5,
       },
       time: {

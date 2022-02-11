@@ -13,6 +13,8 @@ import {
 import LjubljanaTransport from './LjubljanaTransport';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
+const googleMapsKey = require('../config.json').googleMapsKey;
+
 const GooglePlacesInput = () => {
   return (
     <GooglePlacesAutocomplete
@@ -21,7 +23,7 @@ const GooglePlacesInput = () => {
         console.log(data.place_id);
       }}
       query={{
-          key: 'AIzaSyAuyfKKLPGy-FzTFXMFrzIqq-0mYhECQKk',
+          key: googleMapsKey,
           language: 'en',
           location: '46.053730, 14.521310',
           radius: '8000', 

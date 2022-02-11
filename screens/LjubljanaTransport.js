@@ -47,17 +47,21 @@ export default function LjubljanaTransport({ navigation }) {
   const panelReference = React.createRef();
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
+  const [originAddress, setOriginAddress] = useState(null);
+  const [destinationAddress, setDestinationAddress] = useState(null);
   const [logoVisible, setLogoVisible] = useState(true);
+
+  const googleMapsKey = require('../config.json').googleMapsKey;
 
   const GooglePlacesInput = () => {
     return (
       <GooglePlacesAutocomplete
         onPress={(data, details = null) => {
-          placeFound(data.place_id);
-          console.log(data.place_id);
+          placeFound(data.place_id, data.description);
+          console.log(data);
         }}
         query={{
-            key: 'AIzaSyAuyfKKLPGy-FzTFXMFrzIqq-0mYhECQKk',
+            key: googleMapsKey,
             language: 'en',
             location: '46.053730, 14.521310',
             radius: '8000', 
@@ -71,15 +75,19 @@ export default function LjubljanaTransport({ navigation }) {
     );
   };
 
-  function placeFound(placeID){
+  function placeFound(placeID, description){
     if(origin == null && destination == null) {
       setOrigin(placeID);
+      setOriginAddress(description);
     }
     else if(origin != null && destination == null) {
       setDestination(placeID);
+      setDestinationAddress(description);
       navigation.navigate("DisplayTransport", {
         originPlaceID: origin,
         destinationPlaceID: placeID,
+        originAddress: originAddress,
+        destinationAddress: description,
       });
     }
   }
@@ -88,6 +96,8 @@ export default function LjubljanaTransport({ navigation }) {
     panelReference.current?.show(windowHeight*0.7);
     setOrigin(null);
     setDestination(null);
+    setOriginAddress(null);
+    setDestinationAddress(null);
   }
 
   function getMeHome(){
