@@ -9,20 +9,22 @@ import {
     LinearGradient,
     Dimensions,
     TouchableOpacity,
+    TouchableHighlight,
     Button,
     Image,
     Platform,
-    TouchableHighlight,
   } from "react-native";
 import axios from "axios";
 import MapView, { Polyline } from "react-native-maps";
 import { PROVIDER_GOOGLE, Marker } from "react-native-maps";
 import {BoxShadow} from 'react-native-shadow';
+import { useSelector, useDispatch } from "react-redux";
+import { setOrigin, setOriginAddress, setDestination, setDestinationAddress } from "../redux/actions";
 
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
 
-export default function DisplayTransport({route}) {
+export default function DisplayTransport({route, navigation}) {
 
     const googleMapsKey = require('../config.json').googleMapsKey;
 
@@ -45,8 +47,10 @@ export default function DisplayTransport({route}) {
         longitudeDelta: 0.05,
       });
     const panelReference = React.createRef();
-    const [originPlaceID, setOriginPlaceID] = useState(route.params.originPlaceID)
-    const [destinationPlaceID, setDestinationPlaceID] = useState(route.params.destinationPlaceID)
+    // const [originPlaceID, setOriginPlaceID] = useState(route.params.originPlaceID)
+    // const [destinationPlaceID, setDestinationPlaceID] = useState(route.params.destinationPlaceID)
+    const dispatch = useDispatch();
+    const { origin, originAddress, destination, destinationAddress } = useSelector(state => state.ljubljanaTransportReducer);
     const [originCoordinates, setOriginCoordinates] = useState({
       lat: 46.033703,
       lng: 14.4525267,
@@ -56,12 +60,10 @@ export default function DisplayTransport({route}) {
       lng: 14.4525267,
     })
 
-    const markers = [originCoordinates, destinationCoordinates];
-
     useEffect(() => {
         // const json = JSON.stringify({
-        //     origin: route.params.originPlaceID,
-        //     destination: route.params.destinationPlaceID,     
+        //     origin: origin,
+        //     destination: destination,     
         //   });
         //   axios.defaults.headers.common["X-Context"] = json;
         //   axios
@@ -74,9 +76,8 @@ export default function DisplayTransport({route}) {
         //     });
 
         // Get coordinates of origin and destination
-        console.log("yessir")
-        getCoordinatesFromPlaceID(originPlaceID, true);
-        getCoordinatesFromPlaceID(destinationPlaceID, false);
+        getCoordinatesFromPlaceID(origin, true);
+        getCoordinatesFromPlaceID(destination, false);
 
       }, []);
 
@@ -117,6 +118,18 @@ export default function DisplayTransport({route}) {
       .catch(function (error) {
         console.log(error);
       });
+    }
+
+    function clearOrigin() {
+      dispatch(setOrigin(null));
+      dispatch(setOriginAddress(null));
+      navigation.navigate("LjubljanaTransport");
+    }
+
+    function clearDestination() {
+      dispatch(setDestination(null));
+      dispatch(setDestinationAddress(null));
+      navigation.navigate("LjubljanaTransport");
     }
 
     return(
@@ -163,8 +176,9 @@ export default function DisplayTransport({route}) {
               <Image source={require('../assets/startText3.png')} style={styles.ABImg} />
             </View>
             <View style={{flex: 1, marginRight: 3}}>
-              <Text style={{fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>{route.params.originAddress}</Text>
+              <Text style={{fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>{originAddress}</Text>
             </View>
+            <TouchableOpacity onPress={() => clearOrigin()} ><Image source={require('../assets/close.png')} style={{width: 14, height: 14, marginRight: 7}} /></TouchableOpacity>
           </TouchableOpacity>
           <View style={{flexDirection:"row"}}>
             <TouchableOpacity activeOpacity={1} style={styles.destinationContainer} >
@@ -172,8 +186,9 @@ export default function DisplayTransport({route}) {
                 <Image source={require('../assets/endText3.png')} style={styles.ABImg} />
               </View>
               <View style={{flex: 1, marginRight: 3}}>
-                <Text style={{fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>{route.params.destinationAddress}</Text>
+                <Text style={{fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>{destinationAddress}</Text>
               </View>
+              <TouchableOpacity onPress={() => clearDestination()} ><Image source={require('../assets/close.png')} style={{width: 14, height: 14, marginRight: 7}} /></TouchableOpacity>
             </TouchableOpacity>
           </View>
         </View>

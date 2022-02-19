@@ -20,6 +20,8 @@ import MapView from "react-native-maps";
 import { PROVIDER_GOOGLE } from "react-native-maps";
 import SlidingUpPanel from 'rn-sliding-up-panel';
 import {BoxShadow} from 'react-native-shadow';
+import { useSelector, useDispatch } from "react-redux";
+import { setOrigin, setOriginAddress, setDestination, setDestinationAddress } from "../redux/actions";
 
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
@@ -45,10 +47,12 @@ export default function LjubljanaTransport({ navigation }) {
     longitudeDelta: 0.05,
   });
   const panelReference = React.createRef();
-  const [origin, setOrigin] = useState(null);
-  const [destination, setDestination] = useState(null);
-  const [originAddress, setOriginAddress] = useState(null);
-  const [destinationAddress, setDestinationAddress] = useState(null);
+  const dispatch = useDispatch();
+  const { origin, originAddress, destination, destinationAddress } = useSelector(state => state.ljubljanaTransportReducer);
+  // const [origin, setOrigin] = useState(null);
+  // const [destination, setDestination] = useState(null);
+  // const [originAddress, setOriginAddress] = useState(null);
+  // const [destinationAddress, setDestinationAddress] = useState(null);
   const [logoVisible, setLogoVisible] = useState(true);
 
   const googleMapsKey = require('../config.json').googleMapsKey;
@@ -77,27 +81,28 @@ export default function LjubljanaTransport({ navigation }) {
 
   function placeFound(placeID, description){
     if(origin == null && destination == null) {
-      setOrigin(placeID);
-      setOriginAddress(description);
+      dispatch(setOrigin(placeID));
+      dispatch(setOriginAddress(description));
     }
-    else if(origin != null && destination == null) {
-      setDestination(placeID);
-      setDestinationAddress(description);
-      navigation.navigate("DisplayTransport", {
-        originPlaceID: origin,
-        destinationPlaceID: placeID,
-        originAddress: originAddress,
-        destinationAddress: description,
-      });
+    else {
+      if(origin != null && destination == null) {
+        dispatch(setDestination(placeID));
+        dispatch(setDestinationAddress(description));
+      }
+      else if(origin == null && destination != null) {
+        dispatch(setOrigin(placeID));
+        dispatch(setOriginAddress(description));
+      }
+      navigation.navigate("DisplayTransport");
     }
   }
 
   function getMeAToB() {
     panelReference.current?.show(windowHeight*0.7);
-    setOrigin(null);
-    setDestination(null);
-    setOriginAddress(null);
-    setDestinationAddress(null);
+    dispatch(setOrigin(null));
+    dispatch(setDestination(null));
+    dispatch(setOriginAddress(null));
+    dispatch(setDestinationAddress(null));
   }
 
   function getMeHome(){
@@ -173,7 +178,7 @@ export default function LjubljanaTransport({ navigation }) {
             style={styles.lj}
           />
         </View>
-        <SlidingUpPanel ref={panelReference} backdropOpacity={0} onDragStart={()=> {setLogoVisible(false)}} onBottomReached={()=> {setLogoVisible(true)}}>
+        <SlidingUpPanel ref={panelReference} style={{display: 'none'}} backdropOpacity={0} onDragStart={()=> {setLogoVisible(false)}} onBottomReached={()=> {setLogoVisible(true)}}>
           <View style={styles.slidingUpPanel}>
             <GooglePlacesInput style={styles.googleSearch} />
             <View style={styles.bgPanel} />
