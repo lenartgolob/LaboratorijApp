@@ -14,7 +14,6 @@ import {
   Platform,
   TouchableHighlight,
 } from "react-native";
-// import GooglePlacesInput from './GooglePlacesInput';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import MapView from "react-native-maps";
 import { PROVIDER_GOOGLE } from "react-native-maps";
@@ -73,8 +72,8 @@ export default function LjubljanaTransport({ navigation }) {
             strictbounds: true,
         }}
         nearbyPlacesAPI="GooglePlacesSearch" // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
-        renderLeftButton={()  => <Image source={ (origin == null) ? require('../assets/start.png') : require('../assets/end.png')} style={stylesGoogleInput.search} />}
-        styles={stylesGoogleInput}
+        renderLeftButton={()  => <Image source={ (origin == null) ? require('../assets/start.png') : require('../assets/end.png')} style={stylesGoogleInputIOS.search} />}
+        styles={ Platform.OS === 'ios' ? stylesGoogleInputIOS : stylesGoogleInputAndroid}
       />
     );
   };
@@ -98,7 +97,11 @@ export default function LjubljanaTransport({ navigation }) {
   }
 
   function getMeAToB() {
-    panelReference.current?.show(windowHeight*0.7);
+    if(Platform.OS === 'ios') {
+      panelReference.current?.show(windowHeight*0.7);
+    } else {
+      panelReference.current?.show(windowHeight*0.57);
+    }
     dispatch(setOrigin(null));
     dispatch(setDestination(null));
     dispatch(setOriginAddress(null));
@@ -123,7 +126,7 @@ export default function LjubljanaTransport({ navigation }) {
         />
         { Platform.OS === 'ios' ?
           <View style={styles.multiSearchContainerIOS}>
-            <TouchableOpacity activeOpacity={1} style={styles.searchContainer} onPress={()=> getMeAToB()}>
+            <TouchableOpacity activeOpacity={0.9} style={styles.searchContainer} onPress={()=> getMeAToB()}>
               <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                   <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me from A to B</Text>
@@ -131,13 +134,13 @@ export default function LjubljanaTransport({ navigation }) {
               <View style={{width: 34}} />
             </TouchableOpacity>
             <View style={{flexDirection:"row"}}>
-              <TouchableOpacity activeOpacity={1} style={styles.homeContainer} onPress={()=> getMeHome()}>
+              <TouchableOpacity activeOpacity={0.9} style={styles.homeContainer} onPress={()=> getMeHome()}>
                 <Image source={require('../assets/home2.png')} style={styles.homeImg} />
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                   <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me home</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity activeOpacity={1} style={styles.workContainer} onPress={()=> getMeToWork()}>
+              <TouchableOpacity activeOpacity={0.9} style={styles.workContainer} onPress={()=> getMeToWork()}>
                 <Image source={require('../assets/work2.png')} style={styles.workImg} />
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                   <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me to work</Text>
@@ -148,7 +151,7 @@ export default function LjubljanaTransport({ navigation }) {
         :   
         <BoxShadow setting={shadowOpt}>
         <View style={styles.multiSearchContainerAndroid}>
-          <TouchableOpacity activeOpacity={1} style={styles.searchContainer} onPress={()=> getMeAToB()}>
+          <TouchableOpacity activeOpacity={0.9} style={styles.searchContainer} onPress={()=> getMeAToB()}>
             <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
             <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me from A to B</Text>
@@ -156,13 +159,13 @@ export default function LjubljanaTransport({ navigation }) {
             <View style={{width: 34}} />
           </TouchableOpacity>
           <View style={{flexDirection:"row"}}>
-            <TouchableOpacity activeOpacity={1} style={styles.homeContainer} onPress={()=> getMeHome()}>
+            <TouchableOpacity activeOpacity={0.9} style={styles.homeContainer} onPress={()=> getMeHome()}>
               <Image source={require('../assets/home2.png')} style={styles.homeImg} />
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me home</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity activeOpacity={1} style={styles.workContainer} onPress={()=> getMeToWork()}>
+            <TouchableOpacity activeOpacity={0.9} style={styles.workContainer} onPress={()=> getMeToWork()}>
               <Image source={require('../assets/work2.png')} style={styles.workImg} />
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me to work</Text>
@@ -181,7 +184,7 @@ export default function LjubljanaTransport({ navigation }) {
         <SlidingUpPanel ref={panelReference} style={{display: 'none'}} backdropOpacity={0} onDragStart={()=> {setLogoVisible(false)}} onBottomReached={()=> {setLogoVisible(true)}}>
           <View style={styles.slidingUpPanel}>
             <GooglePlacesInput style={styles.googleSearch} />
-            <View style={styles.bgPanel} />
+            <View style={ Platform.OS === 'ios' ? styles.bgPanelIOS : styles.bgPanelAndroid } />
           </View>
         </SlidingUpPanel>
       </View>  
@@ -246,7 +249,13 @@ const styles = StyleSheet.create({
   slidingUpPanel: {
     height: windowHeight*0.7,
   },
-  bgPanel: {
+  bgPanelAndroid: {
+    backgroundColor: '#009f48',
+    height: '100%',
+    marginTop: 35,
+    borderRadius: 8,
+  },
+  bgPanelIOS: {
     backgroundColor: '#009f48',
     height: '100%',
     marginTop: 25,
@@ -285,7 +294,7 @@ const styles = StyleSheet.create({
   }
 });
 
-const stylesGoogleInput = StyleSheet.create({
+const stylesGoogleInputIOS = StyleSheet.create({
   container: {
     zIndex: 10,
     overflow: 'visible',
@@ -308,6 +317,53 @@ const stylesGoogleInput = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.5,
     shadowRadius: 2,  
+    elevation: 5,
+  },
+  textInput: {
+    backgroundColor: 'transparent',
+    fontSize: 18,
+    lineHeight: 22.5,
+    paddingBottom: 0,
+    flex: 1,
+  },
+  listView: {
+    position: 'absolute',
+    top: 60,
+    left: 10,
+    right: 10,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    flex: 1,
+    elevation: 3,
+    zIndex: 10,
+    marginRight: 12,
+    marginLeft: 12,
+  },
+  description: {
+    color: 'black'
+  },
+  predefinedPlacesDescription: {
+    color: 'black'
+  },
+  search: {
+    marginTop: 12,
+    width: 75,
+    height: 30,
+    marginLeft: 5,
+  }
+});
+
+const stylesGoogleInputAndroid = StyleSheet.create({
+  textInputContainer: {
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
+    height: 50,
+    overflow: 'visible',
+    backgroundColor: 'white',
+    borderColor: 'white',
+    borderRadius: 10,
+    marginRight: 20,
+    marginLeft: 20,
     elevation: 5,
   },
   textInput: {
