@@ -61,9 +61,9 @@ export default function Taxis({navigation}) {
       lat: 46.033703,
       lng: 14.4525267,
     })
-    const [taxis, setTaxis] = useState(null);
+    const [taxis, setTaxis] = useState([]);
 
-    useEffect(() => {
+    const get_all_taxis = async () => {
       let URL = "http://192.168.56.1:8080/ljubljana-transport/taxis";
       const json = JSON.stringify({
           origin: origin,
@@ -79,6 +79,10 @@ export default function Taxis({navigation}) {
           .catch(function (error) {
             console.log(error);
           });
+  }
+
+    useEffect(() => {
+        get_all_taxis();
         // Get coordinates of origin and destination
         getCoordinatesFromPlaceID(origin, true);
         getCoordinatesFromPlaceID(destination, false);
@@ -178,12 +182,11 @@ export default function Taxis({navigation}) {
           </View>
         </View>
         <ScrollView>
-          <Text>{taxis != null && taxis[0].email}</Text>
           {
-            taxis != null && taxis.map(function(taxi, index) {
-              <View style={styles.taxiInfoContainer}>
+            taxis.map(function(taxi, index) {
+              return <View style={ index == 0 ? styles.taxiInfoContainerFirst : styles.taxiInfoContainer}>
                 <View style={{justifyContent: 'center', height: 40}}><Text style={styles.taxiHeader}>{taxi.name}</Text></View>
-                <TouchableOpacity onPress={() => call("070 744 153")} style={styles.taxiTextContainer}>
+                <TouchableOpacity onPress={() => call(taxi.phoneNumber)} style={styles.taxiTextContainer}>
                     <Image source={require('../assets/call.png')} style={styles.callImg} />
                     <Text style={styles.taxiText}>{taxi.phoneNumber}</Text>
                 </TouchableOpacity>
@@ -191,7 +194,7 @@ export default function Taxis({navigation}) {
                     <Image source={require('../assets/email.png')} style={styles.callImg} />
                     <Text selectable={true} style={styles.taxiText}>{taxi.email}</Text>
                 </View>
-              </View>
+              </View>;
             })
           }
             <View style={styles.ljContainer}>
@@ -256,6 +259,19 @@ const styles = StyleSheet.create({
       marginRight: 50,
       marginLeft: 50,
       marginTop: 10,
+      // Shadow
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.5,
+      shadowRadius: 2,  
+      elevation: 2,
+    },
+    taxiInfoContainerFirst: {
+      backgroundColor: 'white',
+      borderRadius: 5,
+      marginRight: 50,
+      marginLeft: 50,
+      marginTop: 20,
       // Shadow
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 1 },

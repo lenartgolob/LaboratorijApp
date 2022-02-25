@@ -20,7 +20,10 @@ import { PROVIDER_GOOGLE, Marker } from "react-native-maps";
 import {BoxShadow} from 'react-native-shadow';
 import { useSelector, useDispatch } from "react-redux";
 import { setOrigin, setOriginAddress, setDestination, setDestinationAddress } from "../redux/actions";
-import getDirections from 'react-native-google-maps-directions'
+import getDirections from 'react-native-google-maps-directions';
+import * as Location from "expo-location";
+import { Pedometer } from "expo-sensors";
+import * as Battery from "expo-battery";
 
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
@@ -29,154 +32,177 @@ export default function DisplayTransport({route, navigation}) {
 
     const googleMapsKey = require('../config.json').googleMapsKey;
 
-    const shadowOpt = { 
-        width: windowWidth-40,
-        height:100,
-        color:"#000",
-        border:2,
-        radius:10,
-        opacity:0.3,
-        x:1,
-        y:1,
-        style: {marginVertical:5, marginLeft: 20, marginRight: 20, marginTop: -50}
-    }
-    
-      const [region, setRegion] = useState({
-        latitude: 46.053730,
-        longitude: 14.521310,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      });
-    const panelReference = React.createRef();
-    // const [originPlaceID, setOriginPlaceID] = useState(route.params.originPlaceID)
-    // const [destinationPlaceID, setDestinationPlaceID] = useState(route.params.destinationPlaceID)
-    const dispatch = useDispatch();
-    const { origin, originAddress, destination, destinationAddress } = useSelector(state => state.ljubljanaTransportReducer);
-    const [originCoordinates, setOriginCoordinates] = useState({
-      lat: 46.033703,
-      lng: 14.4525267,
-    })
-    const [destinationCoordinates, setDestinationCoordinates] = useState({
-      lat: 46.033703,
-      lng: 14.4525267,
-    })
+    const [pastStepCount, setPastStepCount] = useState(0);
+    const [message, setMessage] = useState(null);
+    const [activity, setActivity] = useState(null);
+    const [address, setAddress] = useState(null);
+    const [location, setLocation] = useState(null);
+    const [batteryPercentage, setBatteryPercentage] = useState(null);
+    const [region, setRegion] = useState({
+      latitude: 46.053730,
+      longitude: 14.521310,
+      latitudeDelta: 0.07,
+      longitudeDelta: 0.07,
+    });
+    const [activityLocation, setActivityLocation] = useState(null);
 
-    useEffect(() => {
-        // const json = JSON.stringify({
-        //     origin: origin,
-        //     destination: destination,     
-        //   });
-        //   axios.defaults.headers.common["X-Context"] = json;
-        //   axios
-        //     .get(URL)
-        //     .then(function (response) {
-        //       console.log(response.data);
-        //     })
-        //     .catch(function (error) {
-        //       console.log(error);
-        //     });
 
-        // Get coordinates of origin and destination
-        getCoordinatesFromPlaceID(origin, true);
-        getCoordinatesFromPlaceID(destination, false);
+  let _subscription;
 
-      }, []);
+  const _subscribe = () => {
+    // Steps
+    Pedometer.isAvailableAsync().then(
+      (result) => {
+        console.log(result);
+      },
+      (error) => {
+        console.log("Could not get isPedometerAvailable: " + error);
+      }
+    );
 
-      const mapRef = useRef();
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 1);
+    Pedometer.getStepCountAsync(start, end).then(
+      (result) => {
+        setPastStepCount(result.steps);
+      },
+      (error) => {
+        console.log("Could not get stepCount: " + error);
+      }
+    );
+  };
 
-      useEffect(() => {
-        if (mapRef.current) {
-          // list of _id's must same that has been provided to the identifier props of the Marker
-          mapRef.current.fitToSuppliedMarkers(['origin','destination'], { 
-            edgePadding: 
-            { 
-              top: 50,
-              right: 50,
-              bottom: 50,
-              left: 50 
-            }
-          });
-        }
-      }, [originCoordinates, destinationCoordinates]);
+  const _subscribeBattery = async () => {
+    // Battery
+    const batteryLevel = await Battery.getBatteryLevelAsync();
+    setBatteryPercentage(batteryLevel);
+    _subscription = Battery.addBatteryLevelListener(({ batteryLevel }) => {
+      setBatteryPercentage(batteryLevel);
+    });
+  };
 
-    function getCoordinatesFromPlaceID(placeID, isOrigin) {
-      axios
-      .get('https://maps.googleapis.com/maps/api/geocode/json?place_id=' + placeID + '&key=' + googleMapsKey)
+  const _unsubscribe = () => {
+    _subscription && _subscription.remove();
+    _subscription = null;
+  };
+
+  useEffect(() => {
+    // Location
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      console.log(location);
+    })();
+    // Steps
+    _subscribe();
+    // Battery
+    _subscribeBattery();
+    return () => _unsubscribe();
+  }, []);
+
+  function getActivity() {
+    setActivity(null);
+    setAddress(null);
+    setMessage(null);
+    setActivityLocation(null);
+    let date = new Date();
+    let time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + + date.getMinutes();
+    console.log(time);
+    let URL = "http://192.168.56.1:8080/activity-advisor";
+    // const json = JSON.stringify({ location: { latitude: (location == null) ? null : location.coords.latitude, longitude: (location == null) ? null : location.coords.longitude }, steps: pastStepCount, batteryPercentage: Math.round(batteryPercentage*100),  time: time, temperature: 24 });
+    const json = JSON.stringify({
+      location: { latitude: 46.063568, longitude: 14.54745 },
+      temperature: 24,
+      batteryPercentage: Math.round(batteryPercentage*100),
+      time: time,
+
+    });
+    axios.defaults.headers.common["X-Context"] = json;
+    axios
+      .get(URL)
       .then(function (response) {
-        console.log(response.data.results[0].geometry.location);
-        if(isOrigin){
-          setOriginCoordinates({
-            lat: response.data.results[0].geometry.location.lat,
-            lng: response.data.results[0].geometry.location.lng,
-          });
-        } else {
-          setDestinationCoordinates({
-            lat: response.data.results[0].geometry.location.lat,
-            lng: response.data.results[0].geometry.location.lng,
-          });
-        }
+        setMessage(response.data.message);
+        setAddress(response.data.address);
+        setActivity(response.data.name);
+        setActivityLocation({          
+          latitude: response.data.location.latitude,
+          longitude: response.data.location.longitude,
+        });
+        console.log(response.data);
       })
       .catch(function (error) {
         console.log(error);
       });
-    }
+  }
 
-    function handleGetDirections(travelmode) {
-      const data = {
-         source: {
-          latitude: originCoordinates.lat,
-          longitude: originCoordinates.lng
-        },
-        destination: {
-          latitude: destinationCoordinates.lat,
-          longitude: destinationCoordinates.lng
-        },
-        params: [
-          {
-            key: "travelmode",
-            value: travelmode
-          },
-          {
-            key: "dir_action",
-            value: "navigate"
-          }
-        ],
-      }
-      getDirections(data)
-    }
+  const mapRef = useRef();
 
-    return(
-        <View style={styles.container}>
-        <MapView 
-          style={styles.map}
-          provider={PROVIDER_GOOGLE}
-          initialRegion={region}
-          mapPadding={{bottom: 50}}
-          ref={mapRef}
-        >
-          {/* <Marker 
-            key={'origin'}
-            identifier={'origin'}
-            coordinate={{
-            latitude: originCoordinates.lat,
-            longitude: originCoordinates.lng,
+  useEffect(() => {
+    if (mapRef.current) {
+      // list of _id's must same that has been provided to the identifier props of the Marker
+      mapRef.current.fitToSuppliedMarkers(['activityLocation'], { 
+        edgePadding: 
+        { 
+          top: 500,
+          right: 500,
+          bottom: 500,
+          left: 500 
+        }
+      });
+    }
+  }, [activityLocation]);
+
+  function handleGetDirections() {
+    const data = {
+      source: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+      destination: {
+        latitude: activityLocation.latitude,
+        longitude: activityLocation.longitude,
+      },
+      params: [
+        {
+          key: "dir_action",
+          value: "navigate"
+        }
+      ],
+    }
+    getDirections(data)
+  }
+
+  return(
+      <View style={styles.container}>
+      <MapView 
+        style={styles.map}
+        provider={PROVIDER_GOOGLE}
+        initialRegion={region}
+        mapPadding={{bottom: 50}}
+        ref={mapRef}
+      >
+        { activityLocation &&
+        <Marker
+          key={'activityLocation'}
+          identifier={'activityLocation'}
+          coordinate={{
+            latitude: activityLocation.latitude,
+            longitude: activityLocation.longitude,
             }}
-          >
-            <Image source={require('../assets/startMarker.png')} style={{height: 40, width: 40}} />
-          </Marker>
-          <Marker
-            key={'destination'}
-            identifier={'destination'}
-            coordinate={{
-            latitude: destinationCoordinates.lat,
-            longitude: destinationCoordinates.lng,
-            }}
-          >
-            <Image source={require('../assets/endMarker.png')} style={{height: 40, width: 40}} />
-          </Marker>   */}
+            style={{display: 'none'}}
+            onPress={() => handleGetDirections()}
+        />
+        }
         </MapView>       
         <View style={styles.findActivityContainer}>
-          <TouchableOpacity activeOpacity={0.93} style={styles.startContainer}>
+          <TouchableOpacity onPress={() => getActivity()} activeOpacity={0.95} style={styles.startContainer}>
             <View style={{width: 40}}>
               <Image source={require('../assets/idea.png')} style={styles.ideaImg} />
             </View>
@@ -184,6 +210,14 @@ export default function DisplayTransport({route, navigation}) {
               <Text style={{fontSize: 20, fontWeight: 'bold', color: '#696969', fontFamily: 'AvenirNext-Bold', textAlign: 'center'}}>Find Activity</Text>
             </View>
             <View style={{width: 40}} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.activityContainer}>
+          <View style={activity ? {justifyContent: 'center', height: 45, alignItems: 'center'} : {display: 'none'}}><Text style={styles.activityHeader}>{activity}</Text></View>
+          <View style={ message ? styles.activityTextContainer : { display: 'none' }}><Text style={{padding: 3}}>{message}</Text></View>
+          <TouchableOpacity onPress={() => handleGetDirections()} style={ address ? styles.activityTextContainer : {display: 'none'}}>
+            <Image source={require('../assets/location.png')} style={styles.locationImg} />
+            <Text style={{marginLeft: 10, flex: 1, flexWrap: 'wrap'}}>{address}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.ljContainer}>
@@ -241,6 +275,13 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       flex: 1,
       marginBottom: 20,
+    },
+    ljContainerBottom: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      marginBottom: 20,
+      marginTop: 190,
     },
     lj: {
       width: 50,
@@ -389,7 +430,38 @@ const styles = StyleSheet.create({
         fontSize: 11,
         color: '#404040',
         marginRight: 15
-      }
+      },
+      activityContainer: {
+        backgroundColor: 'white',
+        marginRight: 20,
+        marginLeft: 20,
+        marginTop: 30,
+        borderRadius: 5,
+        // Shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,  
+        elevation: 2,
+      },
+      activityHeader: {
+        fontFamily: 'AvenirNext-DemiBold',
+        fontSize: 17,
+        color: '#404040',
+        textAlign: 'center',
+      },
+      activityTextContainer: {
+        borderTopWidth: 1, 
+        borderTopColor: '#D3D3D3', 
+        alignItems: 'center', 
+        flexDirection: 'row',
+        padding: 5,
+      },
+      locationImg: {
+        height: 30,
+        width: 30,
+        marginLeft: 5,
+      },
   });
 
 // import React, { useState, useEffect } from "react";

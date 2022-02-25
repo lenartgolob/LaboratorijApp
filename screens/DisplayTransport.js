@@ -122,13 +122,13 @@ export default function DisplayTransport({route, navigation}) {
         if (mapRef.current) {
           // list of _id's must same that has been provided to the identifier props of the Marker
           mapRef.current.fitToSuppliedMarkers(['origin','destination'], { 
-            edgePadding: 
-            { 
-              top: 50,
-              right: 50,
-              bottom: 50,
-              left: 50 
-            }
+            animated: true,
+            edgePadding: {
+              top: 100,
+              right: 100,
+              bottom: 800,
+              left: 100
+            },
           });
         }
       }, [originCoordinates, destinationCoordinates]);
