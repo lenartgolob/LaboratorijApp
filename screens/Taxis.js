@@ -64,7 +64,7 @@ export default function Taxis({navigation}) {
     const [taxis, setTaxis] = useState([]);
 
     const get_all_taxis = async () => {
-      let URL = "http://192.168.56.1:8080/ljubljana-transport/taxis";
+      let URL = "http://130.61.179.62:8080/ljubljana-transport/taxis";
       const json = JSON.stringify({
           origin: origin,
           destination: destination,     
@@ -132,6 +132,10 @@ export default function Taxis({navigation}) {
         Linking.openURL(`tel:${phoneNumber}`)
     }
 
+    function back() {
+      navigation.navigate("DisplayTransport");
+    }
+
     return(
         <View style={styles.container}>
         <MapView 
@@ -169,14 +173,20 @@ export default function Taxis({navigation}) {
             strokeColor="#77ca9d"
             strokeWidth={3}
           />
-        </MapView>       
+        </MapView>    
+        <TouchableOpacity style={styles.back} onPress={() => back()}>
+          <Image
+            source={require("../assets/back.png")}
+            style={styles.backImg}
+          />
+        </TouchableOpacity>        
         <View style={styles.taxiContainer}>
           <View activeOpacity={1} style={styles.startContainer}>
             <View style={{width: 30}}>
               <Image source={require('../assets/taxi.png')} style={styles.taxiImg} />
             </View>
             <View style={{flex: 1, marginRight: 3, alignItems: 'center'}}>
-              <Text style={{fontSize: 20, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>Taxis</Text>
+              <Text style={Platform.OS === 'ios' ? {fontSize: 20, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3} : {fontSize: 20, fontWeight: 'bold', color: '#989898', marginTop: 3}}>Taxis</Text>
             </View>
             <View style={{width: 30}} />
           </View>
@@ -184,11 +194,11 @@ export default function Taxis({navigation}) {
         <ScrollView>
           {
             taxis.map(function(taxi, index) {
-              return <View style={ index == 0 ? styles.taxiInfoContainerFirst : styles.taxiInfoContainer}>
-                <View style={{justifyContent: 'center', height: 40}}><Text style={styles.taxiHeader}>{taxi.name}</Text></View>
+              return <View key={taxi.name} style={ index == 0 ? styles.taxiInfoContainerFirst : styles.taxiInfoContainer}>
+                <View style={{justifyContent: 'center', height: 40}}><Text style={Platform.OS === 'ios' ? styles.taxiHeaderIOS : styles.taxiHeaderAndroid}>{taxi.name}</Text></View>
                 <TouchableOpacity onPress={() => call(taxi.phoneNumber)} style={styles.taxiTextContainer}>
                     <Image source={require('../assets/call.png')} style={styles.callImg} />
-                    <Text style={styles.taxiText}>{taxi.phoneNumber}</Text>
+                    <Text style={Platform.OS === 'ios' ? styles.taxiTextIOS : styles.taxiTextAndroid}>{taxi.phoneNumber}</Text>
                 </TouchableOpacity>
                 <View style={styles.taxiTextContainer}>
                     <Image source={require('../assets/email.png')} style={styles.callImg} />
@@ -279,8 +289,13 @@ const styles = StyleSheet.create({
       shadowRadius: 2,  
       elevation: 2,
     },
-    taxiHeader: {
+    taxiHeaderIOS: {
       fontFamily: 'AvenirNext-DemiBold',
+      fontSize: 17,
+      color: '#404040',
+      textAlign: 'center',
+    },
+    taxiHeaderAndroid: {
       fontSize: 17,
       color: '#404040',
       textAlign: 'center',
@@ -292,8 +307,13 @@ const styles = StyleSheet.create({
         alignItems: 'center', 
         flexDirection: 'row',
     },
-    taxiText: {
+    taxiTextIOS: {
       fontFamily: 'AvenirNext-DemiBold',
+      fontSize: 15,
+      color: '#707070',
+      marginLeft: 15,
+    },
+    taxiTextAndroid: {
       fontSize: 15,
       color: '#707070',
       marginLeft: 15,
@@ -302,5 +322,22 @@ const styles = StyleSheet.create({
         height: 20,
         width: 20,
         marginLeft: 5,
-    }
+    },
+    back: {
+      position: 'absolute', 
+      left: 15, 
+      top: 35, 
+      backgroundColor: '#E8E8E8', 
+      borderRadius: 5, 
+      paddingRight: 5,
+      paddingLeft: 2, 
+      paddingTop: 3, 
+      paddingBottom: 3,
+      borderColor: '#404040',
+      borderWidth: 2
+    },
+    backImg: {
+      height: 22,
+      width: 22,
+    },
   });

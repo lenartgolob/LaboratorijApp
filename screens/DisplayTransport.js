@@ -74,46 +74,48 @@ export default function DisplayTransport({route, navigation}) {
     const[busPrice, setBusPrice] = useState(null);
     const[trainPrice, setTrainPrice] = useState(null);
 
-    useEffect(() => {
-        let URL = "http://192.168.56.1:8080/ljubljana-transport";
-        const json = JSON.stringify({
-            origin: origin,
-            destination: destination,     
+    const get_all_transports = async () => {
+      let URL = "http://130.61.179.62:8080/ljubljana-transport";
+      const json = JSON.stringify({
+          origin: origin,
+          destination: destination,     
+        });
+        axios.defaults.headers.common["X-Context"] = json;
+        axios
+          .get(URL)
+          .then(function (response) {
+            console.log(response.data);
+            if(response.data.walking.duration != null) {
+              setWalkTime(Math.round(response.data.walking.duration.value/60));
+              setWalkPrice(response.data.walking.kcal + " kcal")
+            }
+            if(response.data.bicycling.duration != null){
+              setBikesTime(Math.round(response.data.bicycling.duration.value/60));
+              setBikesPrice(response.data.bicycling.kcal + " kcal")
+            }
+            if(response.data.taxi.duration != null){
+              setTaxiTime(Math.round(response.data.taxi.duration.value/60));
+              setTaxiPrice(response.data.taxi.price + " €")
+            }
+            if(response.data.bus.duration != null){
+              setBusTime(Math.round(response.data.bus.duration.value/60));
+              setBusPrice(response.data.bus.price + " €")
+            }
+            if(response.data.train.duration != null){
+              setTrainTime(Math.round(response.data.train.duration.value/60));
+              setTrainPrice(response.data.train.price + " €")
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
           });
-          axios.defaults.headers.common["X-Context"] = json;
-          axios
-            .get(URL)
-            .then(function (response) {
-              console.log(response.data);
-              if(response.data.walking.duration != null) {
-                setWalkTime(Math.round(response.data.walking.duration.value/60));
-                setWalkPrice(response.data.walking.kcal + " kcal")
-              }
-              if(response.data.bicycling.duration != null){
-                setBikesTime(Math.round(response.data.bicycling.duration.value/60));
-                setBikesPrice(response.data.bicycling.kcal + " kcal")
-              }
-              if(response.data.taxi.duration != null){
-                setTaxiTime(Math.round(response.data.taxi.duration.value/60));
-                setTaxiPrice(response.data.taxi.price + " €")
-              }
-              if(response.data.bus.duration != null){
-                setBusTime(Math.round(response.data.bus.duration.value/60));
-                setBusPrice(response.data.bus.price + " €")
-              }
-              if(response.data.train.duration != null){
-                setTrainTime(Math.round(response.data.train.duration.value/60));
-                setTrainPrice(response.data.train.price + " €")
-              }
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
+  }
 
+    useEffect(() => {
+        get_all_transports();
         // Get coordinates of origin and destination
         getCoordinatesFromPlaceID(origin, true);
         getCoordinatesFromPlaceID(destination, false);
-
       }, []);
 
       const mapRef = useRef();
@@ -124,10 +126,10 @@ export default function DisplayTransport({route, navigation}) {
           mapRef.current.fitToSuppliedMarkers(['origin','destination'], { 
             animated: true,
             edgePadding: {
-              top: 100,
-              right: 100,
-              bottom: 800,
-              left: 100
+              top: 50,
+              right: 50,
+              bottom: 50,
+              left: 50 
             },
           });
         }
@@ -191,6 +193,10 @@ export default function DisplayTransport({route, navigation}) {
       getDirections(data)
     }
 
+    function back() {
+      navigation.navigate("LjubljanaTransport");
+    }
+
     return(
         <View style={styles.container}>
         <MapView 
@@ -228,14 +234,20 @@ export default function DisplayTransport({route, navigation}) {
             strokeColor="#77ca9d"
             strokeWidth={3}
           />
-        </MapView>       
+        </MapView>    
+        <TouchableOpacity style={styles.back} onPress={() => back()}>
+          <Image
+            source={require("../assets/back.png")}
+            style={styles.backImg}
+          />
+        </TouchableOpacity>      
         <View style={styles.ABContainer}>
           <TouchableOpacity activeOpacity={1} style={styles.startContainer}>
             <View style={{width: 90}}>
               <Image source={require('../assets/startText3.png')} style={styles.ABImg} />
             </View>
             <View style={{flex: 1, marginRight: 3}}>
-              <Text style={{fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>{originAddress}</Text>
+              <Text style={Platform.OS === 'ios' ? {fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3} : {fontSize: 12, fontWeight: 'bold', color: '#989898', marginTop: 3}}>{originAddress}</Text>
             </View>
             <TouchableOpacity onPress={() => clearOrigin()} ><Image source={require('../assets/close.png')} style={{width: 14, height: 14, marginRight: 7}} /></TouchableOpacity>
           </TouchableOpacity>
@@ -245,13 +257,13 @@ export default function DisplayTransport({route, navigation}) {
                 <Image source={require('../assets/endText3.png')} style={styles.ABImg} />
               </View>
               <View style={{flex: 1, marginRight: 3}}>
-                <Text style={{fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3}}>{destinationAddress}</Text>
+                <Text style={Platform.OS === 'ios' ? {fontSize: 12, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold', marginTop: 3} : {fontSize: 12, fontWeight: 'bold', color: '#989898', marginTop: 3}}>{destinationAddress}</Text>
               </View>
               <TouchableOpacity onPress={() => clearDestination()} ><Image source={require('../assets/close.png')} style={{width: 14, height: 14, marginRight: 7}} /></TouchableOpacity>
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.suggestionsContainer}>
+        <View style={Platform.OS === 'ios' ? styles.suggestionsContainerIOS : styles.suggestionsContainerAndroid}>
             <View style={{flexDirection:"row"}}>
                 <TouchableOpacity onPress={() => walkTime != null && handleGetDirections("walking")} activeOpacity={walkTime != null ? 0.9 : 1} style={walkTime != null ? styles.firstSuggestionOn : styles.firstSuggestionOff}>
                     <View style={styles.suggestionsIconContainer}>
@@ -259,16 +271,16 @@ export default function DisplayTransport({route, navigation}) {
                             source={require("../assets/walkman.png")}
                             style={styles.walkImg}
                         />
-                        <Text style={styles.smallText}>Walk</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.smallTextIOS : styles.smallTextAndroid}>Walk</Text>
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { walkTime != null ? 
                         <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
-                          <Text style={styles.kcal}>{walkPrice}</Text>
-                          <Text style={{marginRight: 5}}><Text style={styles.time}>{walkTime}</Text> <Text style={styles.timeUnit}>min</Text></Text>
+                          <Text style={Platform.OS === 'ios' ? styles.kcalIOS : styles.kcalAndroid}>{walkPrice}</Text>
+                          <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{walkTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>
                         :
-                        <Text style={styles.unavailable}>Not found</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.unavailableIOS : styles.unavailableAndroid}>Not found</Text>
                         }
                     </View>
                 </TouchableOpacity>
@@ -278,16 +290,16 @@ export default function DisplayTransport({route, navigation}) {
                             source={require("../assets/bike.png")}
                             style={styles.bikeImg}
                         />
-                        <Text style={styles.smallText}>Bikes</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.smallTextIOS : styles.smallTextAndroid}>Bikes</Text>
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { bikesTime != null ? 
                         <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
-                          <Text style={styles.kcal}>{bikesPrice}</Text>
-                          <Text style={{marginRight: 5}}><Text style={styles.time}>{bikesTime}</Text> <Text style={styles.timeUnit}>min</Text></Text>
+                          <Text style={Platform.OS === 'ios' ? styles.kcalIOS : styles.kcalAndroid}>{bikesPrice}</Text>
+                          <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{bikesTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>
                         :
-                        <Text style={styles.unavailable}>Not found</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.unavailableIOS : styles.unavailableAndroid}>Not found</Text>
                         }
                     </View>
                 </TouchableOpacity>
@@ -299,16 +311,16 @@ export default function DisplayTransport({route, navigation}) {
                             source={require("../assets/taxi.png")}
                             style={styles.taxiImg}
                         />
-                        <Text style={styles.smallText}>Taxis</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.smallTextIOS : styles.smallTextAndroid}>Taxis</Text>
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { taxiTime != null ? 
                         <View>
-                          <Text style={styles.price}>{taxiPrice}</Text>
-                          <Text style={{marginRight: 5}}><Text style={styles.time}>{taxiTime}</Text> <Text style={styles.timeUnit}>min</Text></Text>
+                          <Text style={Platform.OS === 'ios' ? styles.priceIOS : styles.priceAndroid}>{taxiPrice}</Text>
+                          <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{taxiTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>
                         :
-                        <Text style={styles.unavailable}>Not found</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.unavailableIOS : styles.unavailableAndroid}>Not found</Text>
                         }
                     </View>
                 </TouchableOpacity>
@@ -318,16 +330,16 @@ export default function DisplayTransport({route, navigation}) {
                             source={require("../assets/car.png")}
                             style={styles.carImg}
                         />
-                        <Text style={styles.smallText}>Carsharing</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.smallTextIOS : styles.smallTextAndroid}>Carsharing</Text>
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { carsharingTime != null ? 
                         <View>
-                          <Text style={styles.price}>{carsharingPrice}</Text>
-                          <Text style={{marginRight: 5}}><Text style={styles.time}>{carsharingTime}</Text> <Text style={styles.timeUnit}>min</Text></Text>
+                          <Text style={Platform.OS === 'ios' ? styles.priceIOS : styles.priceAndroid}>{carsharingPrice}</Text>
+                          <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{carsharingTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>
                         :
-                        <Text style={styles.unavailable}>Not found</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.unavailableIOS : styles.unavailableAndroid}>Not found</Text>
                         }
                     </View>
                 </View>
@@ -339,16 +351,16 @@ export default function DisplayTransport({route, navigation}) {
                             source={require("../assets/bus.png")}
                             style={styles.busImg}
                         />
-                        <Text style={styles.smallText}>Buses</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.smallTextIOS : styles.smallTextAndroid}>Buses</Text>
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { busTime != null ? 
                         <View>
-                          <Text style={styles.price}>{busPrice}</Text>
-                          <Text style={{marginRight: 5}}><Text style={styles.time}>{busTime}</Text> <Text style={styles.timeUnit}>min</Text></Text>
+                          <Text style={Platform.OS === 'ios' ? styles.priceIOS : styles.priceAndroid}>{busPrice}</Text>
+                          <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{busTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>
                         :
-                        <Text style={styles.unavailable}>Not found</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.unavailableIOS : styles.unavailableAndroid}>Not found</Text>
                         }
 
                     </View>
@@ -359,16 +371,16 @@ export default function DisplayTransport({route, navigation}) {
                             source={require("../assets/train.png")}
                             style={styles.trainImg}
                         />
-                        <Text style={styles.smallText}>Trains</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.smallTextIOS : styles.smallTextAndroid}>Trains</Text>
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { trainTime != null ? 
                         <View>
-                          <Text style={styles.price}>{trainPrice}</Text>
-                          <Text style={{marginRight: 5}}><Text style={styles.time}>{trainTime}</Text> <Text style={styles.timeUnit}>min</Text></Text>
+                          <Text style={Platform.OS === 'ios' ? styles.priceIOS : styles.priceAndroid}>{trainPrice}</Text>
+                          <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{trainTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>
                         :
-                        <Text style={styles.unavailable}>Not found</Text>
+                        <Text style={Platform.OS === 'ios' ? styles.unavailableIOS : styles.unavailableAndroid}>Not found</Text>
                         }
                     </View>
                 </TouchableOpacity>
@@ -440,7 +452,7 @@ const styles = StyleSheet.create({
       height: 40,
       marginLeft: 7,
     },
-    suggestionsContainer: {
+    suggestionsContainerIOS: {
         height: 150,
         borderRadius: 10,
         marginRight: 20,
@@ -453,6 +465,19 @@ const styles = StyleSheet.create({
         shadowRadius: 2,  
         elevation: 2,
         fontFamily: 'AvenirNext-Bold',
+    },
+    suggestionsContainerAndroid: {
+      height: 150,
+      borderRadius: 10,
+      marginRight: 20,
+      marginLeft: 20,
+      marginTop: 25,
+      // Shadow
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.5,
+      shadowRadius: 2,  
+      elevation: 2,
     },
     firstSuggestionOn: {
         backgroundColor: 'white',
@@ -600,38 +625,83 @@ const styles = StyleSheet.create({
         height: 20,
         marginTop: 7,        
       },
-      kcal: {
+      kcalIOS: {
         fontFamily: 'AvenirNext-DemiBold',
         fontSize: 12,
         color: '#989898',
         marginRight: 5,
       },
-      price: {
+      kcalAndroid: {
+        fontSize: 12,
+        color: '#989898',
+        marginRight: 5,
+      },
+      priceIOS: {
         fontFamily: 'AvenirNext-Bold',
         fontSize: 12,
         color: '#787878',
         marginRight: 5,
       },
-      time: {
+      priceAndroid: {
+        fontSize: 12,
+        color: '#787878',
+        marginRight: 5,
+      },
+      timeIOS: {
         fontFamily: 'AvenirNext-Bold',
         fontSize: 18,
         color: '#404040',
       },
-      timeUnit: {
+      timeAndroid: {
+        fontSize: 18,
+        color: '#404040',
+      },
+      timeUnitIOS: {
         fontFamily: 'AvenirNext-Bold',
         fontSize: 10,
         color: '#404040',
       },
-      smallText: {
+      timeUnitAndroid: {
+        fontSize: 10,
+        color: '#404040',
+      },
+      smallTextIOS: {
         fontFamily: 'AvenirNext-Medium',
         fontSize: 11,
         color: '#989898',
         marginBottom: 2,
       },
-      unavailable: {
+      smallTextAndroid: {
+        fontSize: 11,
+        color: '#989898',
+        marginBottom: 2,
+      },
+      unavailableIOS: {
         fontFamily: 'AvenirNext-DemiBold',
         fontSize: 11,
         color: '#404040',
         marginRight: 15
-      }
+      },
+      unavailableAndroid: {
+        fontSize: 11,
+        color: '#404040',
+        marginRight: 15
+      },
+      back: {
+        position: 'absolute', 
+        left: 15, 
+        top: 35, 
+        backgroundColor: '#E8E8E8', 
+        borderRadius: 5, 
+        paddingRight: 5,
+        paddingLeft: 2, 
+        paddingTop: 3, 
+        paddingBottom: 3,
+        borderColor: '#404040',
+        borderWidth: 2
+      },
+      backImg: {
+        height: 22,
+        width: 22,
+      },
   });

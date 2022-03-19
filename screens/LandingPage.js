@@ -41,5 +41,5 @@ const styles = StyleSheet.create({
     },
     btn: {
         marginBottom: 20,
-    }
+    },
 });

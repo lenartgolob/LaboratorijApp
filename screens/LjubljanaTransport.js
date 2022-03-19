@@ -116,6 +116,10 @@ export default function LjubljanaTransport({ navigation }) {
     alert("In development")
   }
 
+  function back() {
+    navigation.navigate("LandingPage");
+  }
+
     return(
       <View style={styles.container}>
         <MapView 
@@ -124,12 +128,18 @@ export default function LjubljanaTransport({ navigation }) {
           initialRegion={region}
           mapPadding={{bottom: 50}}
         />
+        <TouchableOpacity style={styles.back} onPress={() => back()}>
+          <Image
+            source={require("../assets/back.png")}
+            style={styles.backImg}
+          />
+        </TouchableOpacity> 
         { Platform.OS === 'ios' ?
           <View style={styles.multiSearchContainerIOS}>
             <TouchableOpacity activeOpacity={0.9} style={styles.searchContainer} onPress={()=> getMeAToB()}>
               <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me from A to B</Text>
+                  <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
               </View>
               <View style={{width: 34}} />
             </TouchableOpacity>
@@ -137,13 +147,13 @@ export default function LjubljanaTransport({ navigation }) {
               <TouchableOpacity activeOpacity={0.9} style={styles.homeContainer} onPress={()=> getMeHome()}>
                 <Image source={require('../assets/home2.png')} style={styles.homeImg} />
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me home</Text>
+                  <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me home</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity activeOpacity={0.9} style={styles.workContainer} onPress={()=> getMeToWork()}>
                 <Image source={require('../assets/work2.png')} style={styles.workImg} />
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me to work</Text>
+                  <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me to work</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -154,7 +164,7 @@ export default function LjubljanaTransport({ navigation }) {
           <TouchableOpacity activeOpacity={0.9} style={styles.searchContainer} onPress={()=> getMeAToB()}>
             <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
             <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me from A to B</Text>
+                <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
             </View>
             <View style={{width: 34}} />
           </TouchableOpacity>
@@ -162,13 +172,13 @@ export default function LjubljanaTransport({ navigation }) {
             <TouchableOpacity activeOpacity={0.9} style={styles.homeContainer} onPress={()=> getMeHome()}>
               <Image source={require('../assets/home2.png')} style={styles.homeImg} />
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me home</Text>
+                <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily:  'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me home</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={0.9} style={styles.workContainer} onPress={()=> getMeToWork()}>
               <Image source={require('../assets/work2.png')} style={styles.workImg} />
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={{fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'}}>Get me to work</Text>
+                <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily:  'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me to work</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -291,7 +301,24 @@ const styles = StyleSheet.create({
     width: 27,
     height: 27,
     marginLeft: 5,
-  }
+  },
+  back: {
+    position: 'absolute', 
+    left: 15, 
+    top: 35, 
+    backgroundColor: '#E8E8E8', 
+    borderRadius: 5, 
+    paddingRight: 5,
+    paddingLeft: 2, 
+    paddingTop: 3, 
+    paddingBottom: 3,
+    borderColor: '#404040',
+    borderWidth: 2
+  },
+  backImg: {
+    height: 22,
+    width: 22,
+  },
 });
 
 const stylesGoogleInputIOS = StyleSheet.create({
@@ -350,7 +377,7 @@ const stylesGoogleInputIOS = StyleSheet.create({
     width: 75,
     height: 30,
     marginLeft: 5,
-  }
+  },
 });
 
 const stylesGoogleInputAndroid = StyleSheet.create({
@@ -397,5 +424,5 @@ const stylesGoogleInputAndroid = StyleSheet.create({
     width: 75,
     height: 30,
     marginLeft: 5,
-  }
+  },
 });
