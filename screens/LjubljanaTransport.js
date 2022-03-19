@@ -29,14 +29,14 @@ export default function LjubljanaTransport({ navigation }) {
 
   const shadowOpt = {
     width: windowWidth-40,
-    height:100,
+    height:60,
     color:"#000",
     border:2,
     radius:10,
     opacity:0.3,
     x:1,
     y:1,
-    style: {marginVertical:5, marginLeft: 20, marginRight: 20, marginTop: -50}
+    style: {marginVertical:5, marginLeft: 20, marginRight: 20, marginTop: -30}
 }
 
   const [region, setRegion] = useState({
@@ -139,24 +139,10 @@ export default function LjubljanaTransport({ navigation }) {
             <TouchableOpacity activeOpacity={0.9} style={styles.searchContainer} onPress={()=> getMeAToB()}>
               <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
+                  <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 18, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
               </View>
               <View style={{width: 34}} />
             </TouchableOpacity>
-            <View style={{flexDirection:"row"}}>
-              <TouchableOpacity activeOpacity={0.9} style={styles.homeContainer} onPress={()=> getMeHome()}>
-                <Image source={require('../assets/home2.png')} style={styles.homeImg} />
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me home</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity activeOpacity={0.9} style={styles.workContainer} onPress={()=> getMeToWork()}>
-                <Image source={require('../assets/work2.png')} style={styles.workImg} />
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me to work</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
           </View>
         :   
         <BoxShadow setting={shadowOpt}>
@@ -164,24 +150,10 @@ export default function LjubljanaTransport({ navigation }) {
           <TouchableOpacity activeOpacity={0.9} style={styles.searchContainer} onPress={()=> getMeAToB()}>
             <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
             <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
+                <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 18, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
             </View>
             <View style={{width: 34}} />
           </TouchableOpacity>
-          <View style={{flexDirection:"row"}}>
-            <TouchableOpacity activeOpacity={0.9} style={styles.homeContainer} onPress={()=> getMeHome()}>
-              <Image source={require('../assets/home2.png')} style={styles.homeImg} />
-              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily:  'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me home</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.9} style={styles.workContainer} onPress={()=> getMeToWork()}>
-              <Image source={require('../assets/work2.png')} style={styles.workImg} />
-              <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily:  'AvenirNext-Bold'} : {fontSize: 16, fontWeight: 'bold', color: '#989898'}}>Get me to work</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
         </View>
       </BoxShadow>     
         }
@@ -220,11 +192,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,  
   },
   multiSearchContainerIOS: {
-    height: 100,
+    height: 60,
     borderRadius: 10,
     marginRight: 20,
     marginLeft: 20,
-    marginTop: -50,
+    marginTop: -30,
     // Shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -233,9 +205,8 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     backgroundColor: 'white',
-    height: 50,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    height: 60,
+    borderRadius: 10,
     borderBottomColor: '#D3D3D3',
     borderBottomWidth: 1,
     flexDirection: 'row',
@@ -286,8 +257,8 @@ const styles = StyleSheet.create({
   },
   searchImg: {
     marginTop: 10,
-    width: 34,
-    height: 34,
+    width: 37,
+    height: 37,
     marginLeft: 5,
   },
   homeImg: {
