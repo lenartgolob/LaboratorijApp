@@ -139,7 +139,7 @@ export default function LjubljanaTransport({ navigation }) {
             <TouchableOpacity activeOpacity={0.9} style={styles.searchContainer} onPress={()=> getMeAToB()}>
               <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
               <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 18, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
+                  <Text style={Platform.OS === 'ios' ? {fontSize: 20, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 20, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
               </View>
               <View style={{width: 34}} />
             </TouchableOpacity>
@@ -150,7 +150,7 @@ export default function LjubljanaTransport({ navigation }) {
           <TouchableOpacity activeOpacity={0.9} style={styles.searchContainer} onPress={()=> getMeAToB()}>
             <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
             <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                <Text style={Platform.OS === 'ios' ? {fontSize: 16, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 18, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
+                <Text style={Platform.OS === 'ios' ? {fontSize: 20, fontWeight: 'bold', color: '#989898', fontFamily: 'AvenirNext-Bold'} : {fontSize: 20, fontWeight: 'bold', color: '#989898'}}>Get me from A to B</Text>
             </View>
             <View style={{width: 34}} />
           </TouchableOpacity>

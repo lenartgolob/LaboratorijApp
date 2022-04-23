@@ -80,10 +80,11 @@ export default function DisplayTransport({route, navigation}) {
           origin: origin,
           destination: destination,     
         });
+        console.log(json)
         axios.defaults.headers.common["X-Context"] = json;
         axios
           .get(URL)
-          .then(function (response) {
+          .then((response) => {
             console.log(response.data);
             if(response.data.walking.duration != null) {
               setWalkTime(Math.round(response.data.walking.duration.value/60));
@@ -104,6 +105,10 @@ export default function DisplayTransport({route, navigation}) {
             if(response.data.train.duration != null){
               setTrainTime(Math.round(response.data.train.duration.value/60));
               setTrainPrice(response.data.train.price + " €")
+            }
+            if(response.data.carsharing.duration != null){
+              setCarsharingTime(Math.round(response.data.carsharing.duration.value/60));
+              setCarsharingPrice(response.data.carsharing.price + " €")
             }
           })
           .catch(function (error) {
@@ -139,7 +144,6 @@ export default function DisplayTransport({route, navigation}) {
       axios
       .get('https://maps.googleapis.com/maps/api/geocode/json?place_id=' + placeID + '&key=' + googleMapsKey)
       .then(function (response) {
-        console.log(response.data.results[0].geometry.location);
         if(isOrigin){
           setOriginCoordinates({
             lat: response.data.results[0].geometry.location.lat,
@@ -284,7 +288,7 @@ export default function DisplayTransport({route, navigation}) {
                         }
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => bikesTime != null && handleGetDirections("bicycling")} activeOpacity={bikesTime != null ? 0.9 : 1} style={bikesTime != null ? styles.secondSuggestionOn : styles.secondSuggestionOff}>
+                <TouchableOpacity onPress={() => bikesTime != null && navigation.navigate("BicikeLJ")} activeOpacity={bikesTime != null ? 0.9 : 1} style={bikesTime != null ? styles.secondSuggestionOn : styles.secondSuggestionOff}>
                     <View style={styles.suggestionsIconContainer}>
                         <Image
                             source={require("../assets/bike.png")}
@@ -324,7 +328,7 @@ export default function DisplayTransport({route, navigation}) {
                         }
                     </View>
                 </TouchableOpacity>
-                <View style={carsharingTime != null ? styles.fourthSuggestionOn : styles.fourthSuggestionOff}>
+                <TouchableOpacity onPress={() => carsharingTime != null && navigation.navigate("Avant2Go")} activeOpacity={carsharingTime != null ? 0.9 : 1} style={carsharingTime != null ? styles.fourthSuggestionOn : styles.fourthSuggestionOff}>
                   <View style={styles.suggestionsIconContainer}>
                         <Image
                             source={require("../assets/car.png")}
@@ -342,7 +346,7 @@ export default function DisplayTransport({route, navigation}) {
                         <Text style={Platform.OS === 'ios' ? styles.unavailableIOS : styles.unavailableAndroid}>Not found</Text>
                         }
                     </View>
-                </View>
+                </TouchableOpacity>
             </View>
             <View style={{flexDirection:"row"}}>
                 <TouchableOpacity onPress={() => busTime != null && handleGetDirections("transit")} activeOpacity={busTime != null ? 0.9 : 1} style={busTime != null ? styles.fifthSuggestionOn : styles.fifthSuggestionOff}>

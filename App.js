@@ -4,6 +4,8 @@ import ActivityAdvisor from './screens/ActivityAdvisor';
 import LjubljanaTransport from './screens/LjubljanaTransport';
 import DisplayTransport from './screens/DisplayTransport';
 import Taxis from './screens/Taxis';
+import BicikeLJ from './screens/BicikeLJ';
+import Avant2Go from './screens/Avant2Go';
 import { NavigationContainer } from '@react-navigation/native';
 import { Provider } from 'react-redux';
 import { Store } from './redux/store';
@@ -21,6 +23,8 @@ export default function App() {
           <Stack.Screen options={{headerShown: false}} name="LjubljanaTransport" component={LjubljanaTransport} />
           <Stack.Screen options={{headerShown: false}} name="DisplayTransport" component={DisplayTransport} />
           <Stack.Screen options={{headerShown: false}} name="Taxis" component={Taxis} />
+          <Stack.Screen options={{headerShown: false}} name="BicikeLJ" component={BicikeLJ} />
+          <Stack.Screen options={{headerShown: false}} name="Avant2Go" component={Avant2Go} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

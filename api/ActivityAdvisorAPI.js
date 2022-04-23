@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const _API_ = 'http://172.22.80.1:8080/activity-advisor';
+const _API_ = 'http://192.168.83.1:8080/activity-advisor';
 
 function getActivity() {
     let date = new Date();

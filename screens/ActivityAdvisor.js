@@ -115,31 +115,37 @@ export default function DisplayTransport({route, navigation}) {
     let date = new Date();
     let time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + + date.getMinutes();
     console.log(time);
-    let URL = "http://192.168.83.1:8080/activity-advisor";
-    // const json = JSON.stringify({ location: { latitude: (location == null) ? null : location.coords.latitude, longitude: (location == null) ? null : location.coords.longitude }, steps: pastStepCount, batteryPercentage: Math.round(batteryPercentage*100),  time: time, temperature: 24 });
+    let URL = "http://130.61.179.62:8080/activity-advisor";
+    // const json = JSON.stringify({ location: { latitude: (location == null) ? null : location.coords.latitude, longitude: (location == null) ? null : location.coords.longitude }, steps: pastStepCount, batteryPercentage: Math.round(batteryPercentage*100), temperature: 24 });
     const json = JSON.stringify({
       location: { latitude: 46.063568, longitude: 14.54745 },
       temperature: 24,
-      batteryPercentage: Math.round(batteryPercentage*100),
-      time: time,
-
     });
-    axios.defaults.headers.common["X-Context"] = json;
-    axios
-      .get(URL)
-      .then(function (response) {
-        setMessage(response.data.message);
-        setAddress(response.data.address);
-        setActivity(response.data.name);
-        setActivityLocation({          
-          latitude: response.data.location.latitude,
-          longitude: response.data.location.longitude,
-        });
-        console.log(response.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    try {
+      axios.defaults.headers.common["X-Context"] = json;
+      axios
+        .get(URL)
+        .then(function (response) {
+          setMessage(response.data.message);
+          setAddress(response.data.address);
+          setActivity(response.data.name);
+          setActivityLocation({          
+            latitude: response.data.location.latitude,
+            longitude: response.data.location.longitude,
+          });
+        })
+    } catch (err) {
+      if (_.get(err, 'response.status') === HttpStatus.NOT_FOUND) {
+        throw new errors.BadRequestError(`Project with id: ${projectId} doesn't exist`)
+      } else {
+        // re-throw other error
+        throw err
+      }
+    }
+
+      // .catch(function (error) {
+      //   console.log(error);
+      // });
   }
 
   const mapRef = useRef();
@@ -225,7 +231,9 @@ export default function DisplayTransport({route, navigation}) {
           </TouchableOpacity>
         </View>
         <View style={styles.activityContainer}>
-          <View style={activity ? {justifyContent: 'center', height: 45, alignItems: 'center'} : {display: 'none'}}><Text style={Platform.OS === 'ios' ? styles.activityHeaderIOS : styles.activityHeaderAndroid}>{activity}</Text></View>
+          <View style={activity ? {justifyContent: 'center', height: 45, alignItems: 'center'} : {display: 'none'}}>
+            <Text style={Platform.OS === 'ios' ? styles.activityHeaderIOS : styles.activityHeaderAndroid}>{activity}</Text>
+          </View>
           <View style={ message ? styles.activityTextContainer : { display: 'none' }}><Text style={{padding: 3}}>{message}</Text></View>
           <TouchableOpacity onPress={() => handleGetDirections()} style={ address ? styles.activityTextContainer : {display: 'none'}}>
             <Image source={require('../assets/location.png')} style={styles.locationImg} />
@@ -306,11 +314,15 @@ const styles = StyleSheet.create({
         fontSize: 17,
         color: '#404040',
         textAlign: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
       },
       activityHeaderAndroid: {
         fontSize: 17,
         color: '#404040',
         textAlign: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
       },
       activityTextContainer: {
         borderTopWidth: 1, 
