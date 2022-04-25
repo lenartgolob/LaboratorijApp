@@ -319,7 +319,7 @@ export default function DisplayTransport({route, navigation}) {
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { taxiTime != null ? 
-                        <View>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
                           <Text style={Platform.OS === 'ios' ? styles.priceIOS : styles.priceAndroid}>{taxiPrice}</Text>
                           <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{taxiTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>
@@ -338,7 +338,7 @@ export default function DisplayTransport({route, navigation}) {
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { carsharingTime != null ? 
-                        <View>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
                           <Text style={Platform.OS === 'ios' ? styles.priceIOS : styles.priceAndroid}>{carsharingPrice}</Text>
                           <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{carsharingTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>
@@ -359,7 +359,7 @@ export default function DisplayTransport({route, navigation}) {
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { busTime != null ? 
-                        <View>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
                           <Text style={Platform.OS === 'ios' ? styles.priceIOS : styles.priceAndroid}>{busPrice}</Text>
                           <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{busTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>
@@ -379,7 +379,7 @@ export default function DisplayTransport({route, navigation}) {
                     </View>
                     <View style={{flex:1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end'}}>
                         { trainTime != null ? 
-                        <View>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
                           <Text style={Platform.OS === 'ios' ? styles.priceIOS : styles.priceAndroid}>{trainPrice}</Text>
                           <Text style={{marginRight: 5}}><Text style={Platform.OS === 'ios' ? styles.timeIOS : styles.timeAndroid}>{trainTime}</Text> <Text style={Platform.OS === 'ios' ? styles.timeUnitIOS : styles.timeUnitAndroid}>min</Text></Text>
                         </View>

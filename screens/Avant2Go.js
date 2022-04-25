@@ -110,7 +110,7 @@ export default function Taxis({navigation}) {
       useEffect(() => {
         if (mapRef.current) {
           // list of _id's must same that has been provided to the identifier props of the Marker
-          mapRef.current.fitToSuppliedMarkers(['origin','destination','startingStation','finishStation'], { 
+          mapRef.current.fitToSuppliedMarkers(['origin','destination'], { 
             edgePadding: 
             { 
               top: 50,
