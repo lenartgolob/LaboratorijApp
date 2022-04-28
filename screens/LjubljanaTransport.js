@@ -100,7 +100,7 @@ export default function LjubljanaTransport({ navigation }) {
     if(Platform.OS === 'ios') {
       panelReference.current?.show(windowHeight*0.7);
     } else {
-      panelReference.current?.show(windowHeight*0.57);
+      panelReference.current?.show(windowHeight*0.53);
     }
     dispatch(setOrigin(null));
     dispatch(setDestination(null));
