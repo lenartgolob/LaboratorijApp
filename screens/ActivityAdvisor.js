@@ -51,6 +51,7 @@ export default function DisplayTransport({route, navigation}) {
     });
     const [activityLocation, setActivityLocation] = useState(null);
     const [logoVisible, setLogoVisible] = useState(true);
+    const [placeId, setPlaceId] = useState();
 
     const panelReference = React.createRef();
 
@@ -58,7 +59,9 @@ export default function DisplayTransport({route, navigation}) {
       return (
         <GooglePlacesAutocomplete
           onPress={(data, details = null) => {
-            console.log(data);
+            console.log(data.place_id);
+            panelReference.current?.hide();
+            getActivity(data.place_id);
           }}
           query={{
               key: googleMapsKey,
@@ -135,7 +138,7 @@ export default function DisplayTransport({route, navigation}) {
     return () => _unsubscribe();
   }, []);
 
-  function getActivity() {
+  function getActivity(placeId) {
     setActivity(null);
     setAddress(null);
     setMessage(null);
@@ -144,12 +147,22 @@ export default function DisplayTransport({route, navigation}) {
     let time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + + date.getMinutes();
     console.log(time);
     let URL = "http://130.61.179.62:8080/activity-advisor";
-    // const json = JSON.stringify({ location: { latitude: (location == null) ? null : location.coords.latitude, longitude: (location == null) ? null : location.coords.longitude }, steps: pastStepCount, batteryPercentage: Math.round(batteryPercentage*100), temperature: 24 });
+    console.log("yessir");
+    console.log(placeId);
+
+    // const json = JSON.stringify({
+    //   location: { latitude: 46.063568, longitude: 14.54745 },
+    //   temperature: 24,
+    // });
     const json = JSON.stringify({
-      location: { latitude: 46.063568, longitude: 14.54745 },
-      temperature: 24,
-    });
-    try {
+      location: { latitude: (location == null) ? null : location.coords.latitude, 
+                  longitude: (location == null) ? null : location.coords.longitude },
+        steps: pastStepCount,
+        batteryPercentage: Math.round(batteryPercentage*100),
+        temperature: 24,
+        placeId: placeId
+    });  
+
       axios.defaults.headers.common["X-Context"] = json;
       axios
         .get(URL)
@@ -162,55 +175,16 @@ export default function DisplayTransport({route, navigation}) {
             longitude: response.data.location.longitude,
           });
         })
-    } catch (err) {
-      if (_.get(err, 'response.status') === HttpStatus.NOT_FOUND) {
-        throw new errors.BadRequestError(`Project with id: ${projectId} doesn't exist`)
-      } else {
-        // re-throw other error
-        throw err
-      }
-    }
+        .catch(function (error) {
+          console.log(error);
+        });
   }
 
-  function getActivityFromLocation() {
+  function sliderUp() {
     if(Platform.OS === 'ios') {
       panelReference.current?.show(windowHeight*0.7);
     } else {
       panelReference.current?.show(windowHeight*0.53);
-    }
-    setActivity(null);
-    setAddress(null);
-    setMessage(null);
-    setActivityLocation(null);
-    let date = new Date();
-    let time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + + date.getMinutes();
-    console.log(time);
-    let URL = "http://130.61.179.62:8080/activity-advisor";
-    // const json = JSON.stringify({ location: { latitude: (location == null) ? null : location.coords.latitude, longitude: (location == null) ? null : location.coords.longitude }, steps: pastStepCount, batteryPercentage: Math.round(batteryPercentage*100), temperature: 24 });
-    const json = JSON.stringify({
-      location: { latitude: 46.063568, longitude: 14.54745 },
-      temperature: 24,
-    });
-    try {
-      axios.defaults.headers.common["X-Context"] = json;
-      axios
-        .get(URL)
-        .then(function (response) {
-          setMessage(response.data.message);
-          setAddress(response.data.address);
-          setActivity(response.data.name);
-          setActivityLocation({          
-            latitude: response.data.location.latitude,
-            longitude: response.data.location.longitude,
-          });
-        })
-    } catch (err) {
-      if (_.get(err, 'response.status') === HttpStatus.NOT_FOUND) {
-        throw new errors.BadRequestError(`Project with id: ${projectId} doesn't exist`)
-      } else {
-        // re-throw other error
-        throw err
-      }
     }
   }
 
@@ -286,7 +260,7 @@ export default function DisplayTransport({route, navigation}) {
           />
         </TouchableOpacity>    
         <View style={styles.findActivityContainer}>
-          <TouchableOpacity onPress={() => getActivity()} activeOpacity={0.95} style={styles.startContainerTop}>
+          <TouchableOpacity onPress={() => getActivity(null)} activeOpacity={0.95} style={styles.startContainerTop}>
             <View style={{width: 40}}>
               <Image source={require('../assets/idea.png')} style={styles.ideaImg} />
             </View>
@@ -295,7 +269,7 @@ export default function DisplayTransport({route, navigation}) {
             </View>
             <View style={{width: 40}} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => getActivityFromLocation()} activeOpacity={0.95} style={styles.startContainerBottom}>
+          <TouchableOpacity onPress={() => sliderUp()} activeOpacity={0.95} style={styles.startContainerBottom}>
             <View style={{width: 40}}>
               <Image source={require('../assets/AB2.png')} style={styles.searchImg} />
             </View>
@@ -307,7 +281,7 @@ export default function DisplayTransport({route, navigation}) {
         </View>
 
         <View style={styles.activityContainer}>
-          <View style={activity ? {justifyContent: 'center', height: 45, alignItems: 'center'} : {display: 'none'}}>
+          <View style={activity ? {justifyContent: 'center', alignItems: 'center'} : {display: 'none'}}>
             <Text style={Platform.OS === 'ios' ? styles.activityHeaderIOS : styles.activityHeaderAndroid}>{activity}</Text>
           </View>
           <View style={ message ? styles.activityTextContainer : { display: 'none' }}><Text style={{padding: 3}}>{message}</Text></View>
